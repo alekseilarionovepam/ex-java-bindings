@@ -10,6 +10,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -27,12 +29,16 @@ public class PingPongProcessor {
     private final Identifier pingIdentifier;
     private final Identifier pongIdentifier;
 
+    private final ExecutorService executorService;
+
     public PingPongProcessor(String party, LedgerClient client, Identifier pingIdentifier, Identifier pongIdentifier) {
         this.party = party;
         this.ledgerId = client.getLedgerId();
         this.client = client;
         this.pingIdentifier = pingIdentifier;
         this.pongIdentifier = pongIdentifier;
+
+        this.executorService = Executors.newSingleThreadExecutor();
     }
 
     public void runIndefinitely() {
@@ -41,7 +47,7 @@ public class PingPongProcessor {
         Flowable<Transaction> transactions = client.getTransactionsClient().getTransactions(
                 LedgerOffset.LedgerEnd.getInstance(),
                 new FiltersByParty(Collections.singletonMap(party, NoFilter.instance)), true);
-        transactions.forEach(this::processTransaction);
+        transactions.forEach(t -> executorService.execute(() -> processTransaction(t)));
     }
 
     /**
