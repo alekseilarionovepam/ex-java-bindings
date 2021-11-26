@@ -77,6 +77,11 @@ public class PingPongProcessor {
      * party
      */
     private Stream<Command> processEvent(String workflowId, CreatedEvent event) {
+        client.getActiveContractSetClient()
+                .getActiveContracts(new FiltersByParty(Collections.singletonMap(party, NoFilter.instance)), true)
+                .toList()
+                .blockingGet();
+
         Identifier template = event.getTemplateId();
 
         boolean isPing = template.equals(pingIdentifier);

@@ -72,7 +72,7 @@ public class PingPongReactiveMain {
 
         try {
             // wait a couple of seconds for the processing to finish
-            Thread.sleep(5000);
+            Thread.sleep(60000);
             System.exit(0);
         } catch (InterruptedException e) {
             e.printStackTrace();
