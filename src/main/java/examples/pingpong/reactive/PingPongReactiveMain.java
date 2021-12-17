@@ -15,6 +15,7 @@ import io.reactivex.Flowable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
@@ -101,14 +102,26 @@ public class PingPongReactiveMain {
                     )
             );
 
+            logger.info(createCommand.toString());
+            logger.info("Stack trace:" + Arrays.stream(new Throwable().getStackTrace()).map(x -> "\n\t" + x.toString()).collect(Collectors.joining("")));
+
             // asynchronously send the commands
             client.getCommandClient().submitAndWait(
-                    String.format("Ping-%s-%d", sender, i),
-                    APP_ID,
-                    UUID.randomUUID().toString(),
-                    sender,
-                    Collections.singletonList(createCommand))
-                    .blockingGet();
+                            String.format("Ping-%s-%d", sender, i),
+                            APP_ID,
+                            UUID.randomUUID().toString(),
+                            sender,
+                            Collections.singletonList(createCommand))
+                    .subscribe(
+                            e -> {
+                                logger.info("Created successfully.");
+                                logger.info("Stack trace:" + Arrays.stream(new Throwable().getStackTrace()).map(x -> "\n\t" + x.toString()).collect(Collectors.joining("")));
+                            },
+                            t -> {
+                                logger.error("Unable to create!", t);
+                                logger.info("Stack trace:" + Arrays.stream(new Throwable().getStackTrace()).map(x -> "\n\t" + x.toString()).collect(Collectors.joining("")));
+                            }
+                    );
         }
     }
 
