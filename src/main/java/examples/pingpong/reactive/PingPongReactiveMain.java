@@ -106,12 +106,13 @@ public class PingPongReactiveMain {
             logger.info("Stack trace:" + Arrays.stream(new Throwable().getStackTrace()).map(x -> "\n\t" + x.toString()).collect(Collectors.joining("")));
 
             // asynchronously send the commands
-            client.getCommandClient().submitAndWait(
-                            String.format("Ping-%s-%d", sender, i),
-                            APP_ID,
-                            UUID.randomUUID().toString(),
-                            sender,
-                            Collections.singletonList(createCommand))
+            TemporaryFixes.fixSingleFromListenableFuture(
+                            client.getCommandClient().submitAndWait(
+                                    String.format("Ping-%s-%d", sender, i),
+                                    APP_ID,
+                                    UUID.randomUUID().toString(),
+                                    sender,
+                                    Collections.singletonList(createCommand)))
                     .subscribe(
                             e -> {
                                 logger.info("Created successfully.");
